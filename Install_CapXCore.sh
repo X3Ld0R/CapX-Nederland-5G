@@ -26,6 +26,10 @@ read -p "Enter the IP address for s1ap (e.g., 10.100.100.2/23): " s1ap_ip
 read -p "Enter the IP address for gtpu (e.g., 10.100.100.6/23): " gtpu_ip
 read -p "Enter the IP address for upf (e.g., 10.100.100.7/23): " upf_ip
 read -p "Enter the gateway IP (e.g., 10.100.100.254): " gateway
+read -p "Enter DNS1 IP (e.g., 1.0.0.1): " dns1
+read -p "Enter DNS2 IP (e.g., 1.1.1.1): " dns2
+read -p "Enter APN1 pool ip (e.g., 10.45.0.1/16: " apnpool1
+read -p "Enter APN1 gateway ip (e.g., 10.45.0.1: " apngateway1
 
 # Netplan configuratiebestand maken
 cat <<EOL > /etc/netplan/00-installer-config.yaml
@@ -41,7 +45,7 @@ network:
         - to: default
           via: $gateway
       nameservers:
-       addresses: [1.0.0.1, 1.1.1.1]
+       addresses: [$dns1, $dns2]
   version: 2
 EOL
     netplan apply
@@ -66,14 +70,615 @@ EOL
     cp -fR /root/CapX-Nederland-5G/restart.sh /root/
     cp -fR /root/CapX-Nederland-5G/usr/lib/node_modules/open5gs/next/* /usr/lib/node_modules/open5gs/.next/
     cp -fR /root/CapX-Nederland-5G/Open5GS/* /etc/open5gs/ 
-    cp -fR /root/CapX-Nederland-5G/open5gs-webui.service /lib/systemd/system/
     sysctl -w net.ipv4.ip_forward=1
     sysctl -w net.ipv6.conf.all.forwarding=1
     iptables -t nat -A POSTROUTING -s 10.45.0.1/16 ! -o ogstun -j MASQUERADE
     ip6tables -t nat -A POSTROUTING -s 2001:db8:cafe::/48 ! -o ogstun -j MASQUERADE
     iptables -I INPUT -i ogstun -j ACCEPT
-fi
+# AMF configuratie 
+    cat <<EOL > /etc/Open5GS/amf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/amf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
 
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+amf:
+  sbi:
+    server:
+      - address: 127.0.0.5
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+  ngap:
+    server:
+      - address: $s1ap_ip
+  metrics:
+    server:
+      - address: 127.0.0.5
+        port: 9090
+  guami:
+    - plmn_id:
+        mcc: 204
+        mnc: 25
+      amf_id:
+        region: 2
+        set: 1
+  tai:
+    - plmn_id:
+        mcc: 204
+        mnc: 25
+      tac: 1
+  plmn_support:
+    - plmn_id:
+        mcc: 204
+        mnc: 25
+      s_nssai:
+        - sst: 1
+  security:
+    integrity_order : [ NIA2, NIA1, NIA0 ]
+    ciphering_order : [ NEA0, NEA1, NEA2 ]
+  network_name:
+    full: ICTimmers
+    short: ICTimmers
+  amf_name: open5gs-amf0
+  time:
+#    t3502:
+#      value: 720   # 12 minutes * 60 = 720 seconds
+    t3512:
+      value: 540    # 9 minutes * 60 = 540 seconds
+EOL
+# AUSF configuratie 
+    cat <<EOL > /etc/Open5GS/ausf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/ausf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+ausf:
+  sbi:
+    server:
+      - address: 127.0.0.11
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+EOL
+# BSF configuratie 
+    cat <<EOL > /etc/Open5GS/bsf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/bsf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+bsf:
+  sbi:
+    server:
+      - address: 127.0.0.15
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+EOL
+# HSS configuratie 
+    cat <<EOL > /etc/Open5GS/hss.yaml
+db_uri: mongodb://localhost/open5gs
+logger:
+  file:
+    path: /var/log/open5gs/hss.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+hss:
+  freeDiameter: /etc/freeDiameter/hss.conf
+#  sms_over_ims: "sip:smsc.mnc001.mcc001.3gppnetwork.org:7060;transport=tcp"
+#  use_mongodb_change_stream: true
+EOL
+# MME configuratie 
+    cat <<EOL > /etc/Open5GS/mme.yaml
+logger:
+  file:
+    path: /var/log/open5gs/mme.log
+    level: debug   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+mme:
+  freeDiameter: /etc/freeDiameter/mme.conf
+  s1ap:
+    server:
+      - address: $s1ap_ip
+  gtpc:
+    server:
+      - address: 127.0.0.2
+    client:
+      sgwc:
+        - address: 127.0.0.3
+      smf:
+        - address: 127.0.0.4
+  metrics:
+    server:
+      - address: 127.0.0.2
+        port: 9090
+  gummei:
+    - plmn_id:
+        mcc: 204
+        mnc: 25
+      mme_gid: 2
+      mme_code: 1
+  tai:
+    - plmn_id:
+        mcc: 204
+        mnc: 25
+      tac: 1
+  security:
+    integrity_order : [ EIA2, EIA1, EIA0 ]
+    ciphering_order : [ EEA0, EEA1, EEA2 ]
+  network_name:
+    full: ICTimmers
+    short: ICTimmers
+  mme_name: open5gs-mme0
+  time:
+EOL
+# NRF configuratie 
+    cat <<EOL > /etc/Open5GS/nrf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/nrf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+nrf:
+  serving:  # 5G roaming requires PLMN in NRF
+    - plmn_id:
+        mcc: 204
+        mnc: 25
+    - plmn_id:
+        mcc: 206
+        mnc: 01
+  sbi:
+    server:
+      - address: 127.0.0.10
+        port: 7777
+EOL
+# NSSF configuratie 
+    cat <<EOL > /etc/Open5GS/nssf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/nssf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+nssf:
+  sbi:
+    server:
+      - address: 127.0.0.14
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+      nsi:
+        - uri: http://127.0.0.10:7777
+          s_nssai:
+            sst: 1
+EOL
+# PCF configuratie 
+    cat <<EOL > /etc/Open5GS/pcf.yaml
+db_uri: mongodb://localhost/open5gs
+logger:
+  file:
+    path: /var/log/open5gs/pcf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+pcf:
+  sbi:
+    server:
+      - address: 127.0.0.13
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+  metrics:
+    server:
+      - address: 127.0.0.13
+        port: 9090
+EOL
+# PCRF configuratie 
+    cat <<EOL > /etc/Open5GS/pcrf.yaml
+
+db_uri: mongodb://localhost/open5gs
+logger:
+  file:
+    path: /var/log/open5gs/pcrf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+pcrf:
+  freeDiameter: /etc/freeDiameter/pcrf.conf
+EOL
+# SCP configuratie 
+    cat <<EOL > /etc/Open5GS/scp.yaml
+logger:
+  file:
+    path: /var/log/open5gs/scp.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+scp:
+  sbi:
+    server:
+      - address: 127.0.0.200
+        port: 7777
+    client:
+      nrf:
+        - uri: http://127.0.0.10:7777
+EOL
+# SEPP1 configuratie 
+    cat <<EOL > /etc/Open5GS/sepp1.yaml
+logger:
+  file:
+    path: /var/log/open5gs/sepp1.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+sepp:
+  default:
+    tls:
+      server:
+        private_key: /etc/open5gs/tls/sepp1.key
+        cert: /etc/open5gs/tls/sepp1.crt
+      client:
+        cacert: /etc/open5gs/tls/ca.crt
+  sbi:
+    server:
+      - address: 127.0.1.250
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+  n32:
+    server:
+      - sender: sepp1.localdomain
+        scheme: https
+        address: 127.0.1.251
+        port: 7777
+        n32f:
+          scheme: https
+          address: 127.0.1.252
+          port: 7777
+    client:
+      sepp:
+        - receiver: sepp2.localdomain
+          uri: https://sepp2.localdomain:7777
+          resolve: 127.0.2.251
+          n32f:
+            uri: https://sepp2.localdomain:7777
+            resolve: 127.0.2.252
+EOL
+EOL
+# SEPP2 configuratie 
+    cat <<EOL > /etc/Open5GS/sepp2.yaml
+logger:
+  file:
+    path: /var/log/open5gs/sepp2.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+sepp:
+  default:
+    tls:
+      server:
+        private_key: /etc/open5gs/tls/sepp2.key
+        cert: /etc/open5gs/tls/sepp2.crt
+      client:
+        cacert: /etc/open5gs/tls/ca.crt
+  sbi:
+    server:
+      - address: 127.0.2.250
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+  n32:
+    server:
+      - sender: sepp2.localdomain
+        scheme: https
+        address: 127.0.2.251
+        port: 7777
+        n32f:
+          scheme: https
+          address: 127.0.2.252
+          port: 7777
+    client:
+      sepp:
+        - receiver: sepp1.localdomain
+          uri: https://sepp1.localdomain:7777
+          resolve: 127.0.1.251
+          n32f:
+            uri: https://sepp1.localdomain:7777
+            resolve: 127.0.1.252
+EOL
+# SGWC configuratie 
+    cat <<EOL > /etc/Open5GS/sgwc.yaml
+logger:
+  file:
+    path: /var/log/open5gs/sgwc.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+sgwc:
+  gtpc:
+    server:
+      - address: 127.0.0.3
+  pfcp:
+    server:
+      - address: 127.0.0.3
+    client:
+      sgwu:
+        - address: 127.0.0.6
+EOL
+# SGWU configuratie 
+    cat <<EOL > /etc/Open5GS/sgwu.yaml
+logger:
+logger:
+  file:
+    path: /var/log/open5gs/sgwu.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+sgwu:
+  pfcp:
+    server:
+      - address: 127.0.0.6
+    client:
+#      sgwc:    # SGW-U PFCP Client try to associate SGW-C PFCP Server
+#        - address: 127.0.0.3
+  gtpu:
+    server:
+      - address: $gtpu_ip
+EOL
+# SMF configuratie 
+    cat <<EOL > /etc/Open5GS/smf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/smf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+smf:
+  sbi:
+    server:
+      - address: 127.0.0.4
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+  pfcp:
+    server:
+      - address: 127.0.0.4
+    client:
+      upf:
+        - address: 127.0.0.7
+  gtpc:
+    server:
+      - address: 127.0.0.4
+  gtpu:
+    server:
+      - address: 127.0.0.4
+  metrics:
+    server:
+      - address: 127.0.0.4
+        port: 9090
+  session:
+    - subnet: $apnpool1
+      gateway: $apngateway1
+      dnn: internet
+  dns:
+    - $dns1
+    - $dns2
+  mtu: 1500
+#  p-cscf:
+#    - 127.0.0.1
+#    - ::1
+#  ctf:
+#    enabled: auto   # auto(default)|yes|no
+  freeDiameter: /etc/freeDiameter/smf.conf
+EOL
+# UDM configuratie 
+    cat <<EOL > /etc/Open5GS/udm.yaml
+logger:
+  file:
+    path: /var/log/open5gs/udm.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+udm:
+  hnet:
+    - id: 1
+      scheme: 1
+      key: /etc/open5gs/hnet/curve25519-1.key
+    - id: 2
+      scheme: 2
+      key: /etc/open5gs/hnet/secp256r1-2.key
+    - id: 3
+      scheme: 1
+      key: /etc/open5gs/hnet/curve25519-3.key
+    - id: 4
+      scheme: 2
+      key: /etc/open5gs/hnet/secp256r1-4.key
+    - id: 5
+      scheme: 1
+      key: /etc/open5gs/hnet/curve25519-5.key
+    - id: 6
+      scheme: 2
+      key: /etc/open5gs/hnet/secp256r1-6.key
+  sbi:
+    server:
+      - address: 127.0.0.12
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+EOL
+# UDR configuratie 
+    cat <<EOL > /etc/Open5GS/udr.yaml
+db_uri: mongodb://localhost/open5gs
+logger:
+  file:
+    path: /var/log/open5gs/udr.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+udr:
+  sbi:
+    server:
+      - address: 127.0.0.20
+        port: 7777
+    client:
+#      nrf:
+#        - uri: http://127.0.0.10:7777
+      scp:
+        - uri: http://127.0.0.200:7777
+EOL
+# UPF configuratie 
+    cat <<EOL > /etc/Open5GS/upf.yaml
+logger:
+  file:
+    path: /var/log/open5gs/upf.log
+#  level: info   # fatal|error|warn|info(default)|debug|trace
+
+global:
+  max:
+    ue: 1024  # The number of UE can be increased depending on memory size.
+#    peer: 64
+
+upf:
+  pfcp:
+    server:
+      - address: 127.0.0.7
+    client:
+#      smf:     #  UPF PFCP Client try to associate SMF PFCP Server
+#        - address: 127.0.0.4
+  gtpu:
+    server:
+      - address: $upf_ip
+  session:
+    - subnet: $apnpool1
+      # gateway: $apngateway1
+  metrics:
+    server:
+      - address: 127.0.0.7
+        port: 9090
+EOL
+# WEBGUI configuratie 
+    cat <<EOL > /lib/systemd/system/open5gs-webui.service
+[Unit]
+Description=Open5GS WebUI
+Wants=mongodb.service mongod.service
+
+[Service]
+Type=simple
+
+WorkingDirectory=/usr/lib/node_modules/open5gs
+Environment=NODE_ENV=production
+Environment=HOSTNAME=0.0.0.0
+Environment=PORT=9999
+ExecStart=/usr/bin/node server/index.js
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
+EOL
+fi
 systemctl enable open5gs-mmed
 systemctl enable open5gs-sgwud
 systemctl enable open5gs-mmed
