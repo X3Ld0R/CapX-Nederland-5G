@@ -48,15 +48,25 @@ network:
        addresses: [$dns1, $dns2]
   version: 2
 EOL
+# Maak tunnel definatief
+cat << EOF > /etc/systemd/network/99-open5gs.netdev
+[NetDev]
+Name=ogstun
+Kind=tun
+EOF
+    systemctl enable systemd-networkd
+    systemctl restart systemd-networkd
     netplan apply
     cp -fR /root/CapX-Nederland-5G/00-installer-config.yaml /etc/netplan/
     apt update
-    apt install -y vim net-tools ca-certificates curl gnupg nodejs iputils-ping git
+    apt install -y vim net-tools ca-certificates curl gnupg nodejs iputils-ping git software-properties-common iptables
     add-apt-repository ppa:open5gs/latest
     sudo apt update && sudo apt upgrade
     sudo mkdir -p /etc/apt/keyrings
-    curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor    echo y
-    apt update
+    curl -fsSL https://pgp.mongodb.com/server-7.0.asc |  sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor    apt update
+    echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+    deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse
+    sudo apt update
     sudo apt install mongodb-org nodejs -y
     systemctl start mongod
     systemctl enable mongod 
