@@ -63,11 +63,12 @@ EOF
     add-apt-repository ppa:open5gs/latest
     sudo apt update && sudo apt upgrade
     sudo mkdir -p /etc/apt/keyrings
-    curl -fsSL https://pgp.mongodb.com/server-7.0.asc |  sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor    apt update
+    curl -fsSL https://pgp.mongodb.com/server-7.0.asc |  sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+    apt update
     echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
     deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse
     sudo apt update
-    sudo apt install mongodb-org nodejs -y
+    sudo apt install mongodb-org
     systemctl start mongod
     systemctl enable mongod 
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
@@ -75,6 +76,7 @@ EOF
     echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
     apt update
     apt install nodejs -y
+    apt install open5gs
     curl -fsSL https://open5gs.org/open5gs/assets/webui/install | sudo -E bash -
     git clone https://github.com/X3Ld0R/CapX-Nederland-5G.git
     cp -fR /root/CapX-Nederland-5G/restart.sh /root/
