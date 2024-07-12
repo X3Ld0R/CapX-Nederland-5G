@@ -54,12 +54,13 @@ cat << EOF > /etc/systemd/network/99-open5gs.netdev
 Name=ogstun
 Kind=tun
 EOF
+    apt update
+    apt install -y vim net-tools ca-certificates curl gnupg nodejs iputils-ping git software-properties-common iptables netplan
     systemctl enable systemd-networkd
     systemctl restart systemd-networkd
     netplan apply
+    git clone https://github.com/X3Ld0R/CapX-Nederland-5G.git
     cp -fR /root/CapX-Nederland-5G/00-installer-config.yaml /etc/netplan/
-    apt update
-    apt install -y vim net-tools ca-certificates curl gnupg nodejs iputils-ping git software-properties-common iptables
     add-apt-repository ppa:open5gs/latest
     sudo apt update && sudo apt upgrade
     sudo mkdir -p /etc/apt/keyrings
@@ -78,7 +79,6 @@ EOF
     apt install nodejs -y
     apt install open5gs
     curl -fsSL https://open5gs.org/open5gs/assets/webui/install | sudo -E bash -
-    git clone https://github.com/X3Ld0R/CapX-Nederland-5G.git
     cp -fR /root/CapX-Nederland-5G/restart.sh /root/
     cp -fR /root/CapX-Nederland-5G/usr/lib/node_modules/open5gs/next/* /usr/lib/node_modules/open5gs/.next/
     cp -fR /root/CapX-Nederland-5G/Open5GS/* /etc/open5gs/ 
