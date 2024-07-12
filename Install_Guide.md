@@ -75,7 +75,7 @@ echo $RESTART_OUTPUT
 - cd /etc/netplan
 - cat 00-installer-config.yaml   # Display network configuration
 - systemctl status NetworkManager
-- 
+
 4- View Live Logs
   
 - sudo tail -f /var/log/open5gs/*.log
