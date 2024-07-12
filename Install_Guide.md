@@ -59,32 +59,47 @@ echo $RESTART_OUTPUT
 # Step 4: Post-Installation Troubleshooting and Verification
 
 1- Display Services Status
-ps aux | grep open5gs
-sudo systemctl is-active open5gs-*
-sudo systemctl list-units --all --plain --no-pager | grep 'open5gs-'
-sudo systemctl status open5gs-*
-2- Restart Services
-sudo systemctl restart open5gs-*    # Restart specific or all services
-sudo systemctl daemon-reload        # Reload systemd configuration
+
+- ps aux | grep open5gs
+- sudo systemctl is-active open5gs-*
+- sudo systemctl list-units --all --plain --no-pager | grep 'open5gs-'
+- sudo systemctl status open5gs-*
+
+2 - Restart Services
+
+- sudo systemctl restart open5gs-*    # Restart specific or all services
+- sudo systemctl daemon-reload        # Reload systemd configuration
+
 3- Check Network Interfaces and Status
-cd /etc/netplan
-cat 00-installer-config.yaml   # Display network configuration
-systemctl status NetworkManager
+
+- cd /etc/netplan
+- cat 00-installer-config.yaml   # Display network configuration
+- systemctl status NetworkManager
+- 
 4- View Live Logs
-sudo tail -f /var/log/open5gs/*.log
-journalctl -u open5gs-mmed -f
+  
+- sudo tail -f /var/log/open5gs/*.log
+- journalctl -u open5gs-mmed -f
+  
 5- WebUI Service Status
-sudo systemctl status open5gs-webui.service
-sudo ss -tuln | grep 9999    # Check if WebUI is listening on port 9999
+
+- sudo systemctl status open5gs-webui.service
+- sudo ss -tuln | grep 9999    # Check if WebUI is listening on port 9999
+  
 6- Mongo Database and Services
-mongo --version
-sudo systemctl status mongod
+
+- mongo --version
+- sudo systemctl status mongod
+  
 7- P Forwarding and NAT Rules
-sysctl net.ipv4.ip_forward    # Check IP forwarding status
-sudo iptables -t nat -S | grep ogstun    # Check NAT rules for interfaces
+
+- sysctl net.ipv4.ip_forward    # Check IP forwarding status
+- sudo iptables -t nat -S | grep ogstun    # Check NAT rules for interfaces
+  
 8- IP Routes and Firewall Rules
-ip route show    # Display IP routes
-sudo iptables -L    # Check firewall rules
+
+- ip route show    # Display IP routes
+- sudo iptables -L    # Check firewall rules
 
 # Conclusion
 
