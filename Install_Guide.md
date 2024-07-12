@@ -33,10 +33,10 @@ bash  ./Install_CapXCore.sh
 - The script generates a netplan configuration file with the provided IP addresses and network settings.
 - The script will prompt you for several pieces of information during its execution. Be prepared to provide the following:
 
-1- Interface name (e.g., enp0s25)
-2- IP addresses for s1ap, gtpu, upf, and gateway
-3- DNS servers
-4- APNpool IP and gateway
+- Interface name (e.g., enp0s25)
+- IP addresses for s1ap, gtpu, upf, and gateway
+- DNS servers
+- APNpool IP and gateway
 
 # Example Configuration:
 
@@ -54,10 +54,13 @@ APN1 Gateway IP: 10.45.0.1
 # After the installation is complete:
 
 - The script will display the following message:
+- 
 echo "Install complete -- Please connect your browser to port 9999"
+
 -  Additionally, you will be prompted to restart your server:
-RESTART_OUTPUT="Please restart this server by running 'reboot'"
-echo $RESTART_OUTPUT
+  
+RESTART_OUTPUT="Please restart this server by running
+ 'reboot'"    echo $RESTART_OUTPUT
 
 # Step 4: Post-Installation Troubleshooting and Verification
 
@@ -94,7 +97,7 @@ echo $RESTART_OUTPUT
 - mongo --version
 - sudo systemctl status mongod
   
-7- P Forwarding and NAT Rules
+7- IP Forwarding and NAT Rules
 
 - sysctl net.ipv4.ip_forward    # Check IP forwarding status
 - sudo iptables -t nat -S | grep ogstun    # Check NAT rules for interfaces
