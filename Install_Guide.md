@@ -6,15 +6,18 @@ The CapX Core represents a cutting-edge Evolved Packet Core (EPC) solution desig
 
 # Before starting, ensure you have the following:
 
- 1- A server with Ubuntu 22.04
- 2- Git installed on the server
- 3- Sufficient permissions to execute scripts
+ - A server with Ubuntu 22.04
+ - Git installed on the server
+ - Sufficient permissions to execute scripts
  
 # Step 1: Clone the Repository
 
 - Open your terminal and run the following command to clone the repository:
+  
    git clone https://github.com/X3Ld0R/CapX-Nederland-5G.git
+  
  - Navigate to the cloned directory:
+   
    cd CapX-Nederland-5G
 
 # Step 2: Run the Install Script
