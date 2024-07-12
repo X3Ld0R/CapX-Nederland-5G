@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Step 1: Purge Open5GS Packages
+echo "Step 1: Purging Open5GS packages..."
+sudo apt purge -y open5gs
+
+# Step 2: Remove Unnecessary Packages
+echo "Step 2: Removing unnecessary packages..."
+sudo apt autoremove -y
+
+# Step 3: Remove Open5GS Log Directory
+echo "Step 3: Removing Open5GS log directory..."
+sudo rm -Rf /var/log/open5gs
+
+# Step 4: Uninstall Open5GS WebUI
+echo "Step 4: Uninstalling Open5GS WebUI..."
+curl -fsSL https://open5gs.org/open5gs/assets/webui/uninstall | sudo -E bash -
+
+# Step 5: Verify Removal
+echo "Step 5: Verifying removal of Open5GS packages..."
+if dpkg -l | grep -q open5gs; then
+    echo "Some Open5GS packages are still installed:"
+    dpkg -l | grep open5gs
+else
+    echo "All Open5GS packages have been removed."
+fi
+
+echo "Checking if /var/log/open5gs directory exists..."
+if [ -d "/var/log/open5gs" ]; then
+    echo "/var/log/open5gs still exists. Removing it..."
+    sudo rm -Rf /var/log/open5gs
+else
+    echo "/var/log/open5gs has been removed."
+fi
+
+# Step 6: Clean Up
+echo "Step 6: Removing any leftover Open5GS files or directories..."
+sudo rm -Rf /home/capx/Open5Gs_04-04-2024 /home/capx/Open5Gs_06-05-2024 /home/capx/Open5Gs_26-04-2024
+
+echo "Purging specific Open5GS packages if they are in 'rc' state..."
+sudo apt purge -y open5gs-amf open5gs-ausf open5gs-bsf open5gs-common open5gs-hss open5gs-mme open5gs-nrf open5gs-nssf open5gs-pcf open5gs-pcrf open5gs-scp open5gs-sgwc open5gs-sgwu open5gs-smf open5gs-udm open5gs-udr open5gs-upf
+sudo apt autoremove -y
+
+# Final Check
+echo "Final check to ensure no Open5GS files or directories remain..."
+if [ -d "/var/log/open5gs" ]; then
+    echo "/var/log/open5gs still exists. Removing it..."
+    sudo rm -Rf /var/log/open5gs
+else
+    echo "/var/log/open5gs has been removed."
+fi
+
+# Remove any remaining Open5GS packages
+echo "Removing remaining Open5GS packages..."
+sudo apt purge -y open5gs-sepp
+sudo apt autoremove -y
+
+echo "CapXCore has been completely uninstalled from your system."
