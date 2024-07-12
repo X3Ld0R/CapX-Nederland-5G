@@ -1,7 +1,7 @@
 # Installation Guide for CapX Core
 
 CapX Core: A Tailored EPC for Private LTE and 5G
-The CapX Core represents a cutting-edge Evolved Packet Core (EPC) solution designed to meet the specific needs of Private LTE and 5G networks. Built on the robust foundation of the Open5GS core, the CapX Core is meticulously tailored to integrate seamlessly with CapX products, offering unparalleled performance, flexibility, and security for enterprise and industrial applications.
+The CapXCore represents a cutting-edge Evolved Packet Core (EPC) and 5G Core (5GC) solution designed to cater to the unique requirements of Private LTE and 5G networks, completely compliant with 3GPP Release 16 standards. Built on the robust foundation of the Open5GS core, the Capx Core is meticulously tailored to integrate seamlessly with Capx products, offering unparalleled performance, flexibility, and security for enterprise and industrial applications.
 
 # Prerequisites
 
@@ -10,6 +10,7 @@ The CapX Core represents a cutting-edge Evolved Packet Core (EPC) solution desig
  - A server with Ubuntu 22.04
  - Git installed on the server
  - Sufficient permissions to execute scripts
+ - At least one Ethernet GbE or SFP+ interface
  
 # Step 1: Clone the Repository
 
@@ -20,6 +21,10 @@ The CapX Core represents a cutting-edge Evolved Packet Core (EPC) solution desig
  - Navigate to the cloned directory:
    
    cd CapX-Nederland-5G
+   
+- Alternatively, you can copy the script directly to your root directory using this command:
+
+ wget https://github.com/X3Ld0R/CapX-Nederland-5G/archive/refs/heads/main.zip -O capxcore.zip && unzip capxcore.zip -d /root && rm capxcore.zip
 
 # Step 2: Run the Install Script
 
