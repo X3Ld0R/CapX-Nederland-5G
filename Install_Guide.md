@@ -1,4 +1,5 @@
 # Installation Guide for CapX Core
+
 CapX Core: A Tailored EPC for Private LTE and 5G
 The CapX Core represents a cutting-edge Evolved Packet Core (EPC) solution designed to meet the specific needs of Private LTE and 5G networks. Built on the robust foundation of the Open5GS core, the CapX Core is meticulously tailored to integrate seamlessly with CapX products, offering unparalleled performance, flexibility, and security for enterprise and industrial applications.
 
@@ -51,10 +52,11 @@ DNS1 IP Address: 1.0.0.1
 DNS2 IP Address: 1.1.1.1
 APN1 Pool IP: 10.45.0.1/16
 APN1 Gateway IP: 10.45.0.1
+
 # After the installation is complete:
 
 - The script will display the following message:
-- 
+  
 echo "Install complete -- Please connect your browser to port 9999"
 
 -  Additionally, you will be prompted to restart your server:
