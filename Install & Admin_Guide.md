@@ -12,26 +12,24 @@ The CapXCore represents a cutting-edge Evolved Packet Core (EPC) and 5G Core (5G
  - Sufficient permissions to execute scripts
  - At least one Ethernet GbE or SFP+ interface
  
-# Step 1: Clone the Repository
+# Step 1: Download The Script
 
-- Open your terminal and run the following command to clone the repository:
-  
-   git clone https://github.com/X3Ld0R/CapX-Nederland-5G.git
-  
- - Navigate to the cloned directory:
-   
-   cd CapX-Nederland-5G
-   
-- Alternatively, you can copy the script directly to your root directory using this command:
+Open a terminal and navigate to the root directory by running:
 
- wget https://github.com/X3Ld0R/CapX-Nederland-5G/archive/refs/heads/main.zip -O capxcore.zip && unzip capxcore.zip -d /root && rm capxcore.zip
+cd /root
+
+Download the script with the following command:
+
+wget https://github.com/X3Ld0R/CapX-Nederland-5G/raw/main/Install_CapXCore.sh
+
+This command retrieves the Install_CapXCore.sh script from the specified GitHub repository URL and saves it to the /root directory.
 
 # Step 2: Run the Install Script
 
 - Make the install script executable:
-bash  chmod +x Install_CapXCore.sh
+  chmod +x Install_CapXCore.sh
 - Run the install script:
-bash  ./Install_CapXCore.sh
+  ./Install_CapXCore.sh
 
 # Step 3: Follow the steps 
 
