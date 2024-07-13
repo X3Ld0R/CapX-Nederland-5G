@@ -27,9 +27,16 @@ This command retrieves the Install_CapXCore.sh script from the specified GitHub 
 # Step 2: Run the Install Script
 
 - Make the install script executable:
+- 
   chmod +x Install_CapXCore.sh
+  
+   This command grants executable permissions (chmod +x) to the installation script (Install_CapXCore.sh).
+  
 - Run the install script:
+  
   ./Install_CapXCore.sh
+  
+This Command Executes the installation script (Install_CapXCore.sh) using the Bash shell (bash). The script contains a series of commands to install and configure CapX Core components on the server.
 
 # Step 3: Follow the steps 
 
@@ -76,10 +83,14 @@ RESTART_OUTPUT="Please restart this server by running
 - sudo systemctl list-units --all --plain --no-pager | grep 'open5gs-'
 - sudo systemctl status open5gs-*
 
+These commands are used to check the status of various services (open5gs-*) related to CapX Core after installation. They verify whether essential components such as MME, SGW-C, SMF, etc., are running correctly. This helps in troubleshooting if any service fails to start or operate as expected.
+
 2 - Restart Services
 
 - sudo systemctl restart open5gs-*    # Restart specific or all services
 - sudo systemctl daemon-reload        # Reload systemd configuration
+
+ if any service is not running or needs to be restarted due to configuration changes or errors, these commands start (systemctl start) or restart (sudo systemctl restart) the specified CapX Core services. sudo systemctl daemon-reload reloads systemd configuration to ensure any changes made to service files are recognized and applied.
 
 3- Check Network Interfaces and Status
 
@@ -87,30 +98,43 @@ RESTART_OUTPUT="Please restart this server by running
 - cat 00-installer-config.yaml   # Display network configuration
 - systemctl status NetworkManager
 
+These commands inspect network configurations and status post-installation. cat 00-installer-config.yaml displays the Netplan configuration file generated during installation, which includes IP address assignments and network settings. systemctl status NetworkManager verifies the status of NetworkManager, ensuring network interfaces are managed and operational.
+
 4- View Live Logs
   
 - sudo tail -f /var/log/open5gs/*.log
 - journalctl -u open5gs-mmed -f
+
+These commands provide real-time logs (tail -f) of CapX Core services (/var/log/open5gs/*.log) and specific service logs (journalctl -u open5gs-mmed -f). Monitoring logs helps in diagnosing issues such as failed connections or errors encountered during operation, aiding in troubleshooting and maintaining system performance.
   
 5- WebUI Service Status
 
 - sudo systemctl status open5gs-webui.service
 - sudo ss -tuln | grep 9999    # Check if WebUI is listening on port 9999
+
+sudo systemctl status open5gs-webui.service, checks the status of the CapX Core WebUI service, ensuring it is active and running. sudo ss -tuln | grep 9999 verifies if the WebUI is listening on port 9999, enabling users to access the graphical interface for managing CapX Core configurations and monitoring system health.
   
 6- Mongo Database and Services
 
 - mongo --version
 - sudo systemctl status mongod
+
+mongo --version, displays the installed version of MongoDB, which is utilized by CapX Core for data storage and management. sudo systemctl status mongod checks the status of the MongoDB service, ensuring it is operational and available for CapX Core operations that rely on database functionality.
   
 7- IP Forwarding and NAT Rules
 
 - sysctl net.ipv4.ip_forward    # Check IP forwarding status
 - sudo iptables -t nat -S | grep ogstun    # Check NAT rules for interfaces
+
+sysctl net.ipv4.ip_forward, verifies the status of IP forwarding, which is crucial for routing packets between network interfaces in CapX Core. sudo iptables -t nat -S | grep ogstun inspects NAT (Network Address Translation) rules specific to CapX Core interfaces (ogstun), ensuring correct network traffic management and connectivity.
   
 8- IP Routes and Firewall Rules
 
 - ip route show    # Display IP routes
 - sudo iptables -L    # Check firewall rules
+
+ip route show, displays the configured IP routes, outlining the paths packets take through the network. sudo iptables -L lists firewall rules, which regulate incoming and outgoing traffic. Understanding and verifying these configurations are essential for maintaining network security and ensuring proper data flow within CapX Core.
+
 
 # Conclusion
 
