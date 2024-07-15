@@ -2,6 +2,8 @@
 # CapX Core 2024 by Jeffrey Timmer | Forat Selman | Philip Prins
 # Based on opensource core
 
+# Echo message before checking the OS
+echo "Checking the OS version..."
 issue=`head -1 /etc/issue 2>/dev/null`
 case $issue in
     Ubuntu\ 22.04*)
@@ -17,6 +19,7 @@ fi
 
 if [ "$OS" = "ubuntu2204" ]
 then
+echo "Your server meets the standard specifications of Ubuntu 22.04"
 
 # Vraag de interface naam
 read -p "Enter the interface name (e.g., enp0s25): " interface
@@ -60,7 +63,7 @@ EOF
     systemctl restart systemd-networkd
     netplan apply
     git clone https://github.com/X3Ld0R/CapX-Nederland-5G.git
-    cp -fR /root/CapX-Nederland-5G/00-installer-config.yaml /etc/netplan/
+ #  cp -fR /root/CapX-Nederland-5G/00-installer-config.yaml /etc/netplan/    # File Doesn't exist !
     add-apt-repository ppa:open5gs/latest
     sudo apt update && sudo apt upgrade
     sudo mkdir -p /etc/apt/keyrings
@@ -88,7 +91,7 @@ EOF
     ip6tables -t nat -A POSTROUTING -s 2001:db8:cafe::/48 ! -o ogstun -j MASQUERADE
     iptables -I INPUT -i ogstun -j ACCEPT
 # AMF configuratie 
-    cat <<EOL > /etc/Open5GS/amf.yaml
+    cat <<EOL > /etc/Open5gs/amf.yaml                   # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/amf.log
@@ -148,7 +151,7 @@ amf:
       value: 540    # 9 minutes * 60 = 540 seconds
 EOL
 # AUSF configuratie 
-    cat <<EOL > /etc/Open5GS/ausf.yaml
+    cat <<EOL > /etc/open5gs/ausf.yaml               # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/ausf.log
@@ -171,7 +174,7 @@ ausf:
         - uri: http://127.0.0.200:7777
 EOL
 # BSF configuratie 
-    cat <<EOL > /etc/Open5GS/bsf.yaml
+    cat <<EOL > /etc/open5gs/bsf.yaml              # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/bsf.log
@@ -194,7 +197,7 @@ bsf:
         - uri: http://127.0.0.200:7777
 EOL
 # HSS configuratie 
-    cat <<EOL > /etc/Open5GS/hss.yaml
+    cat <<EOL > /etc/open5gs/hss.yaml                    # Fixing directory name from /Open5GS/  to  /open5gs/
 db_uri: mongodb://localhost/open5gs
 logger:
   file:
@@ -212,7 +215,7 @@ hss:
 #  use_mongodb_change_stream: true
 EOL
 # MME configuratie 
-    cat <<EOL > /etc/Open5GS/mme.yaml
+    cat <<EOL > /etc/open5gs/mme.yaml                       # Fixing directory name from /Open5GS/  to  /open5gs/ 
 logger:
   file:
     path: /var/log/open5gs/mme.log
@@ -261,7 +264,7 @@ mme:
   time:
 EOL
 # NRF configuratie 
-    cat <<EOL > /etc/Open5GS/nrf.yaml
+    cat <<EOL > /etc/open5gs/nrf.yaml                   # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/nrf.log
@@ -286,7 +289,7 @@ nrf:
         port: 7777
 EOL
 # NSSF configuratie 
-    cat <<EOL > /etc/Open5GS/nssf.yaml
+    cat <<EOL > /etc/open5gs/nssf.yaml                   # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/nssf.log
@@ -313,7 +316,7 @@ nssf:
             sst: 1
 EOL
 # PCF configuratie 
-    cat <<EOL > /etc/Open5GS/pcf.yaml
+    cat <<EOL > /etc/open5gs/pcf.yaml                  # Fixing directory name from /Open5GS/  to  /open5gs/
 db_uri: mongodb://localhost/open5gs
 logger:
   file:
@@ -341,7 +344,7 @@ pcf:
         port: 9090
 EOL
 # PCRF configuratie 
-    cat <<EOL > /etc/Open5GS/pcrf.yaml
+    cat <<EOL > /etc/open5gs/pcrf.yaml                   # Fixing directory name from /Open5GS/  to  /open5gs/
 
 db_uri: mongodb://localhost/open5gs
 logger:
@@ -357,7 +360,7 @@ pcrf:
   freeDiameter: /etc/freeDiameter/pcrf.conf
 EOL
 # SCP configuratie 
-    cat <<EOL > /etc/Open5GS/scp.yaml
+    cat <<EOL > /etc/open5gs/scp.yaml                # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/scp.log
@@ -378,7 +381,7 @@ scp:
         - uri: http://127.0.0.10:7777
 EOL
 # SEPP1 configuratie 
-    cat <<EOL > /etc/Open5GS/sepp1.yaml
+    cat <<EOL > /etc/open5gs/sepp1.yaml                 # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/sepp1.log
@@ -427,7 +430,7 @@ sepp:
 EOL
 EOL
 # SEPP2 configuratie 
-    cat <<EOL > /etc/Open5GS/sepp2.yaml
+    cat <<EOL > /etc/open5gs/sepp2.yaml                      # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/sepp2.log
@@ -475,7 +478,7 @@ sepp:
             resolve: 127.0.1.252
 EOL
 # SGWC configuratie 
-    cat <<EOL > /etc/Open5GS/sgwc.yaml
+    cat <<EOL > /etc/open5gs/sgwc.yaml                       # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/sgwc.log
@@ -498,7 +501,7 @@ sgwc:
         - address: 127.0.0.6
 EOL
 # SGWU configuratie 
-    cat <<EOL > /etc/Open5GS/sgwu.yaml
+    cat <<EOL > /etc/open5gs/sgwu.yaml                              # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
 logger:
   file:
@@ -522,7 +525,7 @@ sgwu:
       - address: $gtpu_ip
 EOL
 # SMF configuratie 
-    cat <<EOL > /etc/Open5GS/smf.yaml
+    cat <<EOL > /etc/open5gs/smf.yaml                      # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/smf.log
@@ -575,7 +578,7 @@ smf:
   freeDiameter: /etc/freeDiameter/smf.conf
 EOL
 # UDM configuratie 
-    cat <<EOL > /etc/Open5GS/udm.yaml
+    cat <<EOL > /etc/open5gs/udm.yaml                 # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/udm.log
@@ -617,7 +620,7 @@ udm:
         - uri: http://127.0.0.200:7777
 EOL
 # UDR configuratie 
-    cat <<EOL > /etc/Open5GS/udr.yaml
+    cat <<EOL > /etc/open5gs/udr.yaml                    # Fixing directory name from /Open5GS/  to  /open5gs/
 db_uri: mongodb://localhost/open5gs
 logger:
   file:
@@ -641,7 +644,7 @@ udr:
         - uri: http://127.0.0.200:7777
 EOL
 # UPF configuratie 
-    cat <<EOL > /etc/Open5GS/upf.yaml
+    cat <<EOL > /etc/open5gs/upf.yaml               # Fixing directory name from /Open5GS/  to  /open5gs/
 logger:
   file:
     path: /var/log/open5gs/upf.log
