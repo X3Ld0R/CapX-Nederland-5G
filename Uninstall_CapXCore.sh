@@ -34,9 +34,18 @@ else
 fi
 
 # Step 6: Clean Up
-echo "Step 6: Removing any leftover Open5GS files or directories..."
-sudo rm -Rf /home/capx/Open5Gs_04-04-2024 /home/capx/Open5Gs_06-05-2024 /home/capx/Open5Gs_26-04-2024
+echo "Step 6: Removing any leftover Open5GS files or directories from /root and /home..."
+# Remove Open5GS directories from /root
+echo "Removing Open5GS directories from /root..."
+sudo rm -Rf /root/Open5Gs*
 
+# Remove Open5GS directories from all /home/* directories
+for dir in /home/*; do
+    if [ -d "$dir" ]; then
+        echo "Removing Open5GS directories from $dir..."
+        sudo rm -Rf "$dir"/Open5Gs*
+    fi
+done
 echo "Purging specific Open5GS packages if they are in 'rc' state..."
 sudo apt purge -y open5gs-amf open5gs-ausf open5gs-bsf open5gs-common open5gs-hss open5gs-mme open5gs-nrf open5gs-nssf open5gs-pcf open5gs-pcrf open5gs-scp open5gs-sgwc open5gs-sgwu open5gs-smf open5gs-udm open5gs-udr open5gs-upf
 sudo apt autoremove -y
