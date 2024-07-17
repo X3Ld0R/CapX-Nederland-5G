@@ -64,4 +64,13 @@ echo "Removing remaining Open5GS packages..."
 sudo apt purge -y open5gs-sepp
 sudo apt autoremove -y
 
+# Uninstall MongoDB
+echo "Step 7: Uninstalling MongoDB..."
+sudo systemctl stop mongod
+sudo apt purge -y mongodb-org*
+sudo rm -r /var/log/mongodb
+sudo rm -r /var/lib/mongodb
+sudo rm /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt update
+
 echo "CapXCore has been completely uninstalled from your system."
