@@ -70,3 +70,9 @@ check_services
 check_ip_forwarding
 check_nat_rules
 display_final_status
+
+# Uncomment the following lines to add NAT rules (for demonstration; ensure this is what you want):
+# echo -e "\033[1;34mAdding NAT rules...\033[0m"
+# sudo iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE
+# sudo ip6tables -t nat -A POSTROUTING -s 2001:db8:cafe::/48 ! -o ogstun -j MASQUERADE
+# sudo iptables -I INPUT -i ogstun -j ACCEPT
